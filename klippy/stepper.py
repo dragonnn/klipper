@@ -5,6 +5,7 @@
 # This file may be distributed under the terms of the GNU GPLv3 license.
 import math, logging
 import homing, pins
+import chipmisc
 
 class PrinterStepper:
     def __init__(self, printer, config, name):
@@ -109,6 +110,19 @@ class PrinterHomingStepper(PrinterStepper):
                 self.homing_stepper_phases = None
             if self.mcu_endstop.get_mcu().is_fileoutput():
                 self.homing_endstop_accuracy = self.homing_stepper_phases
+
+        self.homing_servo = config.get('homing_servo', default=None)
+        if self.homing_servo != None:
+            self.homing_servo = chipmisc.get_printer_servo(printer, self.homing_servo)
+
+    def home_start(self, print_time):
+        if self.homing_servo != None:
+            self.homing_servo.home_start(print_time)
+
+    def home_end(self, print_time):
+         if self.homing_servo != None:
+                self.homing_servo.home_end(print_time)
+
     def get_homing_speed(self):
         # Round the configured homing speed so that it is an even
         # number of ticks per step.

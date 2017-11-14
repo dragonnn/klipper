@@ -80,6 +80,8 @@ class PrinterServo:
         self.angle_to_width = (self.max_width - self.min_width) / self.max_angle
         self.width_to_value = 1. / SERVO_SIGNAL_PERIOD
         self.last_value = self.last_value_time = 0.
+        self.home_start_angle = config.getfloat('home_start_angle', None)
+        self.home_end_angle = config.getfloat('home_end_angle', None)
     def set_pwm(self, print_time, value):
         if value == self.last_value:
             return
@@ -95,6 +97,14 @@ class PrinterServo:
     def set_pulse_width(self, print_time, width):
         width = max(self.min_width, min(self.max_width, width))
         self.set_pwm(print_time, width * self.width_to_value)
+
+    def home_start(self, print_time):
+        if self.home_start_angle != None:
+            self.set_angle(print_time, self.home_start_angle)
+
+    def home_end(self, print_time):
+        if self.home_end_angle != None:
+            self.set_angle(print_time, self.home_end_angle)
 
 def get_printer_servo(printer, name):
     return printer.objects.get('servo ' + name)
